@@ -1,0 +1,38 @@
+<h1>Welcome to Zene!</h1>
+
+<%= form_tag search_path, method: :get do %>
+  <%= text_field_tag :query, params[:query], placeholder: "Search for a song..." %>
+  <%= submit_tag "Search" %>
+<% end %>
+
+<h2>Popular Lyrics</h2>
+<div class="lyrics-grid">
+  <% @popular_songs.each do |song| %>
+    <div class="lyric-card">
+      <h3><%= link_to song.title, practice_lyric_path(song) %></h3>
+      <p>Artist: <%= song.artist %></p>
+      <%# You can add more details here if you like %>
+    </div>
+  <% end %>
+</div>
+
+<style>
+  .lyrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .lyric-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 5px #eee;
+  }
+
+  .lyric-card h3 a {
+    text-decoration: none;
+    color: #337ab7;
+  }
+</style>

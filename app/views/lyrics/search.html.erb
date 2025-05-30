@@ -1,0 +1,16 @@
+<h1>Search Results</h1>
+
+<%= form_tag search_path, method: :get do %>
+  <%= text_field_tag :query, params[:query], placeholder: "Search for a song..." %>
+  <%= submit_tag "Search" %>
+<% end %>
+
+<% if @search_results.present? %>
+  <ul>
+    <% @search_results.each do |song| %>
+      <li><%= link_to "#{song.title} by #{song.artist}", practice_lyric_path(song) %></li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>No songs found for your query.</p>
+<% end %>
