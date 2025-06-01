@@ -1,4 +1,6 @@
 class LyricsController < ApplicationController
+  include GeniusLyricsHelper
+
   # Constants for Genius API and OAuth
   GENIUS_AUTHORIZE_URL = "https://api.genius.com/oauth/authorize".freeze
   GENIUS_TOKEN_URL = "https://api.genius.com/oauth/token".freeze
@@ -11,20 +13,25 @@ class LyricsController < ApplicationController
   before_action :require_user, only: [:connect_genius, :genius_callback] # Example: Require user to be logged in for OAuth
 
   def index
-    @popular_songs = Song.order(pyongs_count: :desc).limit(10)
-    # Consider fetching popular songs from Genius API if your DB is empty
+    @popular_songs = Rails.cache.fetch('popular_songs', expires_in: 12.hours) do
+      Rails.logger.info "Fetching popular songs with details (cache miss)"
+      Song.order(pyongs_count: :desc).limit(10).to_a.map do |song|
+        fetch_song_details_with_lyrics(song)
+      end
+    end
   end
 
   def practice
     @song = Song.find(params[:id])
-    unless @song.lyrics.present?
-      genius_song = Genius::Song.find(@song.genius_id)
-      if genius_song&.lyrics.present?
-        @song.update(lyrics: genius_song.lyrics)
+    unless @song.lyrics_plain.present?
+      lyrics_plain = fetch_and_cache_genius_lyrics(@song.genius_id)
+      if lyrics_plain.present?
+        @song.update(lyrics_plain: lyrics_plain)
       else
-        redirect_to root_path, alert: 'Failed to fetch lyrics or lyrics are empty.'
+        flash.now[:alert] = 'Failed to fetch lyrics. Please try again.'
       end
     end
+    render :practice
   rescue ActiveRecord::RecordNotFound
     redirect_to root_path, alert: 'Song not found.'
   end
@@ -33,14 +40,15 @@ class LyricsController < ApplicationController
     if params[:query].present?
       genius_results = Genius::Song.search(params[:query])
       @search_results = genius_results.map do |result|
-        song = Song.find_or_create_by(genius_id: result.id) do |s|
+        Song.find_or_create_by(genius_id: result.id) do |s|
           s.title = result.title
           s.artist = result.primary_artist.name
           s.url = result.url
+          s.lyrics_url = result.resource["url"] # Consider storing this separately
           s.pyongs_count = result.pyongs_count
           s.description = result.description
+          s.song_art_image_url = result.resource["song_art_image_url"]
         end
-        song
       end
     else
       @search_results = []
@@ -140,5 +148,27 @@ class LyricsController < ApplicationController
       flash[:alert] = "You need to be logged in to connect your Genius account."
       redirect_to login_path # Replace with your login path
     end
+  end
+
+  def fetch_song_details_with_lyrics(song)
+    # Fetch lyrics if not already present
+    unless song.lyrics_plain.present?
+      lyrics_plain = fetch_and_cache_genius_lyrics(song.genius_id)
+      if lyrics_plain.present?
+        song.update(lyrics_plain: lyrics_plain)
+      else
+        Rails.logger.error "Failed to fetch lyrics for song ID #{song.id}"
+      end
+    end
+
+    # Fetch song details including art URL
+    begin
+      genius_song = Genius::Song.find(song.genius_id)
+      song.song_art_image_url = genius_song.resource["song_art_image_url"] if genius_song.resource["song_art_image_url"].present?
+    rescue Genius::Error => e
+      Rails.logger.error "Error fetching Genius song details for ID #{song.genius_id}: #{e.message}"
+    end
+
+    song
   end
 end

@@ -1,0 +1,24 @@
+/* app/assets/stylesheets/application.scss */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+.lyrics-container {
+  // Style the lyrics as needed
+  p {
+    margin-bottom: 1em;
+    line-height: 1.6;
+    color: #374151; /* Text gray-700 */
+  }
+  // Add more specific styling for elements within the lyrics if needed
+  .annotation {
+    color: #6b7280; /* Text gray-500 */
+    font-size: 0.9em;
+  }
+  // Example styling for potential highlighted sections
+  strong {
+    font-weight: 600;
+    color: #4338ca; /* Indigo-600 */
+  }
+  // ... more styles ...
+}

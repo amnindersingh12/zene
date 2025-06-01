@@ -1,16 +1,32 @@
-<h1>Search Results</h1>
+<div style="font-family: 'Inter', sans-serif; padding: 2rem; background-color: #f8f8f8; border-radius: 0.75rem; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);">
+  <h1 style="font-size: 2.5rem; font-weight: 700; color: #2d3748; margin-bottom: 1.5rem;">Search Songs</h1>
 
-<%= form_tag search_path, method: :get do %>
-  <%= text_field_tag :query, params[:query], placeholder: "Search for a song..." %>
-  <%= submit_tag "Search" %>
-<% end %>
+  <%= form_tag search_lyrics_path, method: :get, style: "display: flex; align-items: center; margin-bottom: 2rem;" do %>
+    <%= text_field_tag :query, params[:query], placeholder: "Enter song title or artist", style: "flex-grow: 1; padding: 0.75rem 1rem; border: 1px solid #e2e8f0; border-radius: 0.375rem; font-size: 1rem; color: #4a5568; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.02); outline: none; transition: border-color 0.15s ease-in-out;" %>
+    <%= submit_tag "Search", style: "background-color: #4f46e5; color: #fff; font-weight: 500; padding: 0.75rem 1.5rem; border: none; border-radius: 0.375rem; font-size: 1rem; cursor: pointer; transition: background-color 0.15s ease-in-out; margin-left: 1rem; &:hover { background-color: #3f38ca; }" %>
+  <% end %>
 
-<% if @search_results.present? %>
-  <ul>
-    <% @search_results.each do |song| %>
-      <li><%= link_to "#{song.title} by #{song.artist}", practice_lyric_path(song) %></li>
-    <% end %>
-  </ul>
-<% else %>
-  <p>No songs found for your query.</p>
-<% end %>
+  <% if @search_results.present? %>
+    <h2 style="font-size: 1.5rem; font-weight: 600; color: #2d3748; margin-bottom: 1rem;">Search Results</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+      <% @search_results.each do |song| %>
+        <div style="background-color: #fff; border-radius: 0.5rem; box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05); overflow: hidden;">
+          <% if song.song_art_image_url.present? %>
+            <%= image_tag song.song_art_image_url, alt: song.title, style: "width: 100%; height: 12rem; object-fit: cover; display: block;" %>
+          <% else %>
+            <div style="width: 100%; height: 12rem; background-color: #edf2f7; display: flex; align-items: center; justify-content: center;">
+              <span style="color: #a0aec0; font-size: 0.9rem;">No Image</span>
+            </div>
+          <% end %>
+          <div style="padding: 1rem;">
+            <h3 style="font-size: 1.1rem; font-weight: 500; color: #2d3748; margin-bottom: 0.5rem;"><%= song.title %></h3>
+            <p style="color: #718096; font-size: 0.9rem; margin-bottom: 0.75rem;">by <%= song.artist %></p>
+            <%= link_to 'View Lyrics', practice_lyric_path(song), style: "display: inline-block; background-color: #4f46e5; color: #fff; font-weight: 500; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.9rem; text-decoration: none; transition: background-color 0.15s ease-in-out; &:hover { background-color: #3f38ca; }" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% elsif params[:query].present? %>
+    <p style="color: #718096;">No songs found matching your query.</p>
+  <% end %>
+</div>

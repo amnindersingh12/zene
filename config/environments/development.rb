@@ -9,6 +9,10 @@ Rails.application.configure do
   # Do not eager load code on boot.
   config.eager_load = false
 
+  # Cache classes to improve performance.
+  config.cache_classes = false
+
+
   # Show full error reports.
   config.consider_all_requests_local = true
 
