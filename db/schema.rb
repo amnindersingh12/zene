@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_31_104122) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_28_060641) do
   create_table "songs", force: :cascade do |t|
     t.string "title"
     t.string "artist"
@@ -20,10 +20,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_31_104122) do
     t.string "song_art_image_url"
     t.string "pyongs_count"
     t.string "description"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.text "lyrics_html"
     t.string "lyrics_url"
     t.text "lyrics_plain"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 end

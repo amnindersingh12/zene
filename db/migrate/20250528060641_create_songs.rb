@@ -10,6 +10,9 @@ class CreateSongs < ActiveRecord::Migration[8.0]
       t.string :pyongs_count
       t.string :description
 
+      t.text :lyrics_html
+      t.string :lyrics_url
+      t.text :lyrics_plain
       t.timestamps
     end
   end
